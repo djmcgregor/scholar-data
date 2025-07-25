@@ -1,0 +1,42 @@
+name: Generate CSV and Publish to Google Sheets
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # Runs at midnight on the first day of every month
+  workflow_dispatch:
+
+jobs:
+  generate_csv:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client pandas scholarly matplotlib
+
+    - name: Run script to pull scholar data
+      env:
+        AUTHOR_ID: ${{ secrets.AUTHOR_ID }}
+      run: python run_citation_metrics.py
+      timeout-minutes: 5
+
+    - name: Run script to push to Google Sheets
+      env:
+        GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+      run: python run_update_google_sheet.py
+
+    - name: Commit CSV
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git diff --quiet && git diff --staged --quiet || (git commit -m "update scholar stats" && git push)

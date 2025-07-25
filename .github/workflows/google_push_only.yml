@@ -1,0 +1,29 @@
+name: Publish data to Google Sheets
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push_to_sheets:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client pandas
+
+    - name: Run script to push to Google Sheets
+      env:
+        GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+      run: python run_update_google_sheet.py
