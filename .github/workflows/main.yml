@@ -8,6 +8,8 @@ on:
 jobs:
   generate_csv:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allows the action to push changes to the repository
 
     steps:
     - name: Checkout code
@@ -40,3 +42,5 @@ jobs:
         git config --local user.name "GitHub Action"
         git add -A
         git diff --quiet && git diff --staged --quiet || (git commit -m "update scholar stats" && git push)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
