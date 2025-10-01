@@ -34,9 +34,13 @@ def save_to_csv(citations_per_year, total_citations, h_index, i10_index):
     df = pd.DataFrame(list(citations_per_year.items()), columns=['Year', 'Citations'])
     df.to_csv('data/annual_citations.csv', index=False)
 
-def plot_citations(citations_per_year):
+def plot_citations(citations_per_year, from_csv=False):
     # Function to generate bar plot
-    df = pd.DataFrame(list(citations_per_year.items()), columns=['Year', 'Citations'])
+    if from_csv:
+        df = pd.read_csv('data/annual_citations.csv')  # read from CSV
+    else:
+        # default, generate the DF from the dict
+        df = pd.DataFrame(list(citations_per_year.items()), columns=['Year', 'Citations'])
     years = df.Year
     citations = df.Citations
     # years = list(citations_per_year.keys())
